@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Debug
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -43,7 +44,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
-    case msg of
+    case (Debug.log "msg" msg) of
         SetLatitude latitude ->
             { model | latitude = latitude } ! []
 
@@ -54,9 +55,9 @@ update msg model =
             { model | latitude = latitude, longitude = longitude } ! []
 
 
-googleMap : List (Attribute a) -> List (Html a) -> Html a
-googleMap =
-    Html.node "google-map"
+mapWrapper : List (Attribute a) -> List (Html a) -> Html a
+mapWrapper =
+    Html.node "map-wrapper"
 
 
 view : Model -> Html Msg
@@ -91,10 +92,9 @@ view model =
             , src "http://package.elm-lang.org/assets/elm_logo.svg"
             ]
             []
-        , googleMap
+        , mapWrapper
             [ attribute "latitude" (toString model.latitude)
             , attribute "longitude" (toString model.longitude)
-            , attribute "drag-events" "true"
             , recordLatLongOnDrag
             ]
             []
@@ -103,7 +103,7 @@ view model =
 
 recordLatLongOnDrag : Attribute Msg
 recordLatLongOnDrag =
-    on "google-map-drag" <|
+    on "map-moved" <|
         map2 SetLatLong
             (at [ "target", "latitude" ] float)
             (at [ "target", "longitude" ] float)
